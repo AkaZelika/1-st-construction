@@ -1,7 +1,7 @@
 # 1-st-construction
 # Сайт для музыкальной группы
 
-# Рефернесы
+# Референесы
 https://vanyadmitrienko.ru/  
 https://jony-tour.ru/  
 http://www.zivert.com/
