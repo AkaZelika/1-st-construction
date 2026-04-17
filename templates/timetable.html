@@ -7,6 +7,25 @@
 </head>
 <body>
     <img src="https://sun9-87.userapi.com/s/v1/ig2/qnp8Zh5Ew_OY7FzAu0WdA9PVIVy4ic43pj9-H5t_ukBkp7MBntyeczEjRyW8WRThSUhsHpEdioTHVW7cgO7Bt7QK.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,800x800&from=bu&u=nc65OCzl4yH4CJbNT12kFsdqO8kJjtjh9DMxAS1KqdQ&cs=800x0" alt="">
-
+    <div>
+        <h1>Рассписание концертов</h1>
+        <table class="timetable">
+            <tbody>
+                {% for consert in concerts %}
+                    <tr>
+                        {% if consert[1]|length > 5 %}
+                            <td>{{ consert[1][5:].replace("-", ".") }}</td>
+                        {% else %}
+                            <td>{{ consert[1].replace("-", ".") }}</td>
+                        {% endif %}
+                        <td><time>{{ consert[2] }}</time></td>
+                        <td>{{ consert[3] }}</td>
+                        <td>{{ consert[4] }}</td>
+                        <td><a href="/ticket/{{ consert[0] }}">купить</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

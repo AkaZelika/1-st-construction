@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавление концерта</title>
+</head>
+<body>
+    <h1>Добавление концерта</h1>
+    <form action="/add_concert" method="post" enctype="multipart/form-data">
+        <label for="date">День:</label>
+        <input type="date" name="date" id="date" required>
+        <br><br>
+        <label for="time">Время:</label>
+        <input type="time" name="time" id="time" required>
+        <br><br>
+        <label for="city">Город:</label>
+        <input type="text" name="city" id="city" required>
+        <br><br>
+        <label for="location">Место:</label>
+        <input type="text" name="location" id="location" required>
+        <br><br>
+        <label for="count_ticket">Количество билетов:</label>
+        <input type="number" name="count_ticket" id="count_ticket" required>
+        <br><br>
+        <input type="submit" value="Добавить концерт">
+    </form>
+</body>
+</html>

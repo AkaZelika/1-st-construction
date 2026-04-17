@@ -19,7 +19,7 @@ def create_data():
             location TEXT,
             count INTEGER
         )
-    """
+    """ #date=YYYY-MM-DD; time=hh-mm-ss
     items = """
         CREATE TABLE IF NOT EXISTS Items(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,6 +64,29 @@ def create_data():
 
     con.close()
 
+def add_concert(date, time, city, location, count=0):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    cur.execute("INSERT INTO Concerts (date, time, city, location, count) VALUES (?, ?, ?, ?, ?)", (date, time, city, location, count))
+    con.commit()
+    con.close()
+
+def get_concerts():
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    concerts = cur.execute("SELECT * FROM Concerts").fetchall()
+    con.close()
+    return concerts
+
+def get_ticket(concert_id):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    ticket_info = cur.execute("SELECT * FROM Concerts WHERE id=?", (concert_id,)).fetchone()
+    con.close()
+    return ticket_info
 
 if __name__ == "__main__":
     create_data()
+    #add_concert(date="2026-04-15", time="15-30", city="Novosibirsk", location="Ул.Татьяны-Снежиной, 51, кв.52", count=10)
+    #add_concert(date="04-25", time="15-00", city="Novosibirsk", location="Ул.Татьяны-Снежиной, 51, кв.52")
+    print(get_concerts())
