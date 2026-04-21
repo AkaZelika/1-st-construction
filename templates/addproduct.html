@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавление продукта</title>
+</head>
+<body>
+    <h1>Добавление товара</h1>
+    <form action="/add_product" method="post" enctype="multipart/form-data">
+        <label for="name">Название:</label>
+        <input type="text" name="name" id="name" required>
+        <br><br>
+        <label for="price">Цена:</label>
+        <input type="number" name="price" id="price" required>
+        <br><br>
+        <label for="count">Количество:</label>
+        <input type="number" name="count" id="count" required>
+        <br><br>
+        <label for="description">Описание:</label>
+        <textarea name="description" id="description" required></textarea>
+        <br><br>
+        <label for="image">Изображение:</label>
+        <input type="file" name="image" id="image" required>
+        <br><br>
+        <input type="submit" value="Добавить товар">
+    </form>
+</body>
+</html>

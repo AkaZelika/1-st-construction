@@ -67,7 +67,8 @@ def create_data():
 def add_concert(date, time, city, location, count=0):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
-    cur.execute("INSERT INTO Concerts (date, time, city, location, count) VALUES (?, ?, ?, ?, ?)", (date, time, city, location, count))
+    cur.execute("INSERT INTO Concerts (date, time, city, location, count) VALUES (?, ?, ?, ?, ?)", 
+                (date, time, city, location, count))
     con.commit()
     con.close()
 
@@ -82,6 +83,28 @@ def get_ticket(concert_id):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
     ticket_info = cur.execute("SELECT * FROM Concerts WHERE id=?", (concert_id,)).fetchone()
+    con.close()
+    return ticket_info
+
+def app_item(name, price, image="", description="", count=0):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    cur.execute("INSERT INTO Items (image, name, price, descriptoin, count) VALUES (?, ?, ?, ?, ?)", 
+                (image, name, price, description, count))
+    con.commit()
+    con.close()
+
+def get_items():
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    concerts = cur.execute("SELECT * FROM Items").fetchall()
+    con.close()
+    return concerts
+
+def get_item(item_id):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    ticket_info = cur.execute("SELECT * FROM Items WHERE id=?", (item_id,)).fetchone()
     con.close()
     return ticket_info
 

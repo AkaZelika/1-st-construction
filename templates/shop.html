@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+    <title>Магазин</title>
+</head>
+<body>
+    <div class="productы">
+        {% for product in products %}
+            <a href="/product/{{ product[2] }}/{{ product[0] }}">
+                <div class="product">
+                    <img src="{{ product[1] }}" width="200" height="200">
+                    <h2>{{ product[2] }}</h2>
+                    <p>Цена: {{ product[3] }}$</p>
+                    <p>Осталось: {{ product[5] }}</p>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</body>
+</html>
