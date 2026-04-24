@@ -1,17 +1,19 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import database
 from werkzeug.utils import secure_filename
 import os
 
 app = Flask("__name__")
+app.secret_key = "trekjse654hlwdkhfoscvnourhgmxbkruthowednfrh0w3948yv65thde3455v6dekruitfos"
 
-UPLOAD_FOLDER = "static/products"
+UPLOAD_FOLDER = "static\products"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 @app.route("/")
 def timetable():
     concerts = database.get_concerts()
-    return render_template("timetable.html", concerts=concerts)
+    cart = session.get("cart", {})
+    return render_template("timetable.html", concerts=concerts, cart=cart)
 
 @app.route("/ticket/<int:ticket_id>")
 def buy_ticket(ticket_id):
@@ -54,5 +56,33 @@ def add_product():
         return redirect(url_for("shop"))
     else:
         return render_template("addproduct.html")
+    
+@app.route("/product/<product_name>/<int:product_id>")
+def product(product_name, product_id):
+    product_info = database.get_item(product_id, product_name)
+    return render_template("productinfo.html", product_info=product_info)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method=="POST":
+        errors = []
+        type_login = request.form["type"]
+        email = request.form["email"]
+        city = request.form["city"]
+        print(type_login, email, city)
+        if len(errors)==0:
+            if type_login=="login":
+                a = database.get_user(email)
+                print(a)
+            else:
+                database.user_logun(email, city)
+                
+            return render_template("timetable.html", errors=errors)
+        else:
+            return render_template("userlogin.html", errors=errors)
+    else:
+        return render_template("userlogin.html")
+    
+
 
 app.run(debug=True)

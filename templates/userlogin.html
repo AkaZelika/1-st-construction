@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регестрация</title>
+</head>
+<body>
+    <form action="/login" method="POST">
+        <div>
+           <label for=""><input type="radio" name="type" value="register">Зарегестрироваться</label>
+           <label for=""><input type="radio" name="type" value="login"> Войти</label>
+        </div>
+        <div>
+            <label for="">Почта:</label>
+            <input type="email" name="email">
+        </div>
+        
+        <div>
+            <input type="submit" value="Войти">
+            </form>
+            <form action="/register">
+            <button>У меня нет аккаунта</button>
+            </form>
+        </div>
+    
+    <div class="errors">
+        {% for error in errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

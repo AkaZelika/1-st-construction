@@ -101,12 +101,50 @@ def get_items():
     con.close()
     return concerts
 
-def get_item(item_id):
+def get_item(item_id, item_name):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
-    ticket_info = cur.execute("SELECT * FROM Items WHERE id=?", (item_id,)).fetchone()
+    item_info = cur.execute("SELECT * FROM Items WHERE id=? AND name=?", (item_id, item_name)).fetchone()
     con.close()
-    return ticket_info
+    return item_info
+
+def user_logun(email, city):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    cur.execute("INSERT INTO Users (email, city) VALUES (?, ?)", (email, city))
+    con.commit()
+    con.close()
+
+def get_user(email):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    user_acc = cur.execute("SELECT * FROM Users WHERE email=?", (email,)).fetchone()
+    con.close()
+    return user_acc
+
+def buy_ticket(type_id, user_id, consert_id):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    cur.execute("INSERT INTO Ticket (type_id, user_id, consert_id) VALUES (?, ?, ?)", (type_id, user_id, consert_id))
+    con.commit()
+    con.close()
+
+def buy_product(user_id, item_id, count):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    cur.execute("INSERT INTO Crats (user_id, item_id, count) VALUES (?, ?, ?)", (user_id, item_id, count))
+    con.commit()
+    con.close()
+
+def cart_update(id, count):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    if count > 0:
+        cur.execute("UPDATE Carts SET count = ? WHERE id = ?", (count, id))
+    else:
+        cur.execute("DELETE Carts WHERE id = ?", (id,))
+    con.commit()
+    con.close()
 
 if __name__ == "__main__":
     create_data()
