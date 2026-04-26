@@ -1,0 +1,73 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.group-icon{
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+
+.group-icon img {
+    height: 100%;
+    margin: auto;
+}
+
+h1 {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+}
+
+.conserts {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-bottom: 40px;
+}
+
+.timetable table{
+    table-layout: auto;
+    border-bottom: 1px solid black;
+    border-spacing: 10px;
+    width: 100%;
+    
+}
+
+.timetable td, th{
+    border-bottom: 1px solid black;
+    text-align: center;
+    vertical-align: middle;
+    padding: 15px;
+    padding-left: 25px;
+    padding-right: 25px;
+    font-size: 2em;
+    width: fit-content;
+}
+
+.timetable {
+    border-collapse: collapse;
+}
+
+.timetable a {
+    color: red;
+    text-decoration: none
+}
+
+.link {
+    display: flex;
+    border-top: 1px solid black;
+    background-color: rgb(233, 238, 241);
+    font-size: 2em;
+    padding-top: 20px;
+    padding-left: 30px;
+}
+
+.link a {
+    padding-left: 10px;
+}

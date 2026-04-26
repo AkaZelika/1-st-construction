@@ -3,13 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/timetable.css') }}">
     <title>1-ая конструкция</title>
 </head>
 <body>
-    <img src="https://sun9-87.userapi.com/s/v1/ig2/qnp8Zh5Ew_OY7FzAu0WdA9PVIVy4ic43pj9-H5t_ukBkp7MBntyeczEjRyW8WRThSUhsHpEdioTHVW7cgO7Bt7QK.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,800x800&from=bu&u=nc65OCzl4yH4CJbNT12kFsdqO8kJjtjh9DMxAS1KqdQ&cs=800x0" alt="">
-    <div>
-        <h1>Рассписание концертов</h1>
+    <div class="group-icon">
+        <img src="{{ url_for('static', filename='group_icon.png' ) }}" alt="">
+    </div>
+    <h1>Рассписание концертов</h1>
+    <div class="conserts">
         <table class="timetable">
+            <thead>
+                <tr>
+                    <td>Дата</td>
+                    <td>Время</td>
+                    <td>Город</td>
+                    <td>Место</td>
+                    <td>Билеты</td>
+                </tr>
+            </thead>
             <tbody>
                 {% for consert in concerts %}
                     <tr>
@@ -21,11 +33,25 @@
                         <td><time>{{ consert[2] }}</time></td>
                         <td>{{ consert[3] }}</td>
                         <td>{{ consert[4] }}</td>
-                        <td><a href="/ticket/{{ consert[0] }}">купить</a></td>
+                        {% if consert[5]==0 %}
+                            <td>SOLD OUT</td>
+                        {% else %}
+                            <td><a href="/ticket/{{ consert[0] }}">купить</a></td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    <footer>
+        <div class="link">
+            Наши социальные сети:   
+            <div>
+                <a href="https://vk.com/firstconst" target="_blank">
+                    <img src="{{ url_for('static', filename='vk.png') }}" alt="vk" width="50px">
+                </a>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
