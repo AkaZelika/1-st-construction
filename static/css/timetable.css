@@ -4,6 +4,12 @@ html, body {
     padding: 0;
 }
 
+.top {
+    width: 100%;
+    position: fixed;
+    background-color: antiquewhite;
+}
+
 .group-icon{
     display: flex;
     justify-content: center;

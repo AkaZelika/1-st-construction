@@ -7,6 +7,13 @@
     <title>Магазин</title>
 </head>
 <body>
+    <div class="top">
+        <h1>1-ая конструкция</h1>
+        <div>
+            <a href="/shop">Мерч</a>
+            <a href="/login">Войти</a>
+        </div>
+    </div>
     <div class="productы">
         {% for product in products %}
             <a href="/product/{{ product[2] }}/{{ product[0] }}">

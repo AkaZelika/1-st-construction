@@ -12,8 +12,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 @app.route("/")
 def timetable():
     concerts = database.get_concerts()
-    cart = session.get("cart", {})
-    return render_template("timetable.html", concerts=concerts, cart=cart)
+    return render_template("timetable.html", concerts=concerts)
 
 @app.route("/ticket/<int:ticket_id>")
 def buy_ticket(ticket_id):
@@ -28,7 +27,6 @@ def add_concert():
         city = request.form["city"]
         location = request.form["location"]
         count_ticket = request.form["count_ticket"]
-        print(date, time, city, location, count_ticket)
         database.add_concert(date, time, city, location, count_ticket)
         return redirect(url_for("timetable"))
     else:
@@ -52,7 +50,8 @@ def add_product():
         image_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         image.save(image_path)
 
-        database.app_item(name=name, price=price, image=image_path, description=description, count=count)
+        database.add_item(name=name, price=price, image=image_path, description=description, count=count)
+        print("save")
         return redirect(url_for("shop"))
     else:
         return render_template("addproduct.html")
@@ -65,24 +64,39 @@ def product(product_name, product_id):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method=="POST":
+        #user = session.get("user", {})
         errors = []
+        data = {}
         type_login = request.form["type"]
         email = request.form["email"]
         city = request.form["city"]
-        print(type_login, email, city)
         if len(errors)==0:
             if type_login=="login":
-                a = database.get_user(email)
-                print(a)
+                user_data = database.get_user(email, info="id, city")
+                data["id"] = user_data[0]
+                data["email"] = email
+                data["city"] = user_data[1]
             else:
-                database.user_logun(email, city)
-                
+                database.user_login(email, city)
+                data["id"] = database.get_user(email, info="id")
+                data["email"] = email
+                data["city"] = city
+            session["user"] = data
             return render_template("timetable.html", errors=errors)
         else:
             return render_template("userlogin.html", errors=errors)
     else:
         return render_template("userlogin.html")
     
-
+@app.route("/add_to_cart/<int:product_id>")
+def add_to_cart(product_id):
+    user_id = session.get("user", {})["data"]["id"]
+    user_cart = session.get("user", {})["cart"]
+    new_product = database.buy_product(user_id, product_id)
+    if user_cart:
+        user_cart[str(new_product[0])] = 1
+    else:
+        ...
+    return redirect(url_for("shop"))
 
 app.run(debug=True)

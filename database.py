@@ -86,7 +86,7 @@ def get_ticket(concert_id):
     con.close()
     return ticket_info
 
-def app_item(name, price, image="", description="", count=0):
+def add_item(name, price, image="", description="", count=0):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
     cur.execute("INSERT INTO Items (image, name, price, descriptoin, count) VALUES (?, ?, ?, ?, ?)", 
@@ -108,17 +108,17 @@ def get_item(item_id, item_name):
     con.close()
     return item_info
 
-def user_logun(email, city):
+def user_login(email, city):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
     cur.execute("INSERT INTO Users (email, city) VALUES (?, ?)", (email, city))
     con.commit()
     con.close()
 
-def get_user(email):
+def get_user(email, info=""):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
-    user_acc = cur.execute("SELECT * FROM Users WHERE email=?", (email,)).fetchone()
+    user_acc = cur.execute(f"SELECT {info} FROM Users WHERE email=?", (email,)).fetchone()
     con.close()
     return user_acc
 
@@ -129,12 +129,13 @@ def buy_ticket(type_id, user_id, consert_id):
     con.commit()
     con.close()
 
-def buy_product(user_id, item_id, count):
+def buy_product(user_id, item_id, count=1):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
-    cur.execute("INSERT INTO Crats (user_id, item_id, count) VALUES (?, ?, ?)", (user_id, item_id, count))
+    cur.execute("INSERT INTO Carts (user_id, item_id, count) VALUES (?, ?, ?)", (user_id, item_id, count))
     con.commit()
-    con.close()
+    cur.execute("SELECT * Carts WHERE user_id=? AND item_id=?", (user_id, item_id))
+    return cur.fetchone()
 
 def cart_update(id, count):
     con = sqlite3.connect("data.bd")
