@@ -3,27 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
     <title>Магазин</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
 </head>
 <body>
     <div class="top">
         <h1>1-ая конструкция</h1>
         <div>
+            {% if admin == 0 %}
+                <a href="/add_product">Добавить мерч</a>
+                <a href="/add_ticket">добавить концерт</a>
+            {% endif %}
             <a href="/shop">Мерч</a>
+            <a href="/cart">Карзина</a>
             <a href="/login">Войти</a>
         </div>
     </div>
-    <div class="productы">
+    <div class="top">
+        <h1>1-ая конструкция</h1>
+        <div>
+            {% if admin == 1 %}
+                <a href="/add_product">Добавить мерч</a>
+                <a href="/add_ticket">добавить концерт</a>
+            {% endif %}
+            <a href="/shop">Мерч</a>
+            <a href="/cart">Карзина</a>
+            <a href="/login">Войти</a>
+        </div>
+    </div>
+    <div class="products">
         {% for product in products %}
-            <a href="/product/{{ product[2] }}/{{ product[0] }}">
-                <div class="product">
-                    <img src="{{ product[1] }}" width="200" height="200">
-                    <h2>{{ product[2] }}</h2>
-                    <p>Цена: {{ product[3] }}$</p>
-                    <p>Осталось: {{ product[5] }}</p>
-                </div>
-            </a>
+            {% if product[5] > 0 %}
+                <a href="/product/{{ product[2] }}/{{ product[0] }}">
+                    <div class="product">
+                        <div class="img">
+                            <img src="{{ product[1] }}" width="200" height="200">
+                            {% if product[0] in in_cart %}
+                                <div>В корзине</div>
+                            {% endif %}
+                        </div>
+                        <div class="name">{{ product[2] }}</div>
+                        <div class="price">Цена: {{ product[3] }}₽</div>
+                        <div class="count">Осталось: {{ product[5] }}</div>
+                    </div>
+                </a>
+            {% endif %}
         {% endfor %}
     </div>
 </body>

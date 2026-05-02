@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3, os
 
 def create_data():
     con = sqlite3.connect("data.bd")
@@ -134,8 +134,18 @@ def buy_product(user_id, item_id, count=1):
     cur = con.cursor()
     cur.execute("INSERT INTO Carts (user_id, item_id, count) VALUES (?, ?, ?)", (user_id, item_id, count))
     con.commit()
-    cur.execute("SELECT * Carts WHERE user_id=? AND item_id=?", (user_id, item_id))
-    return cur.fetchone()
+    cur.execute("SELECT id FROM Carts WHERE user_id=? AND item_id=?", (user_id, item_id))
+    product_id = cur.fetchone()
+    con.close()
+    return product_id[0]
+
+def get_cart_product(cart_id):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    cur.execute("SELECT * FROM Carts WHERE id=?", (cart_id,))
+    product_id = cur.fetchone()
+    con.close()
+    return product_id
 
 def cart_update(id, count):
     con = sqlite3.connect("data.bd")
@@ -147,8 +157,34 @@ def cart_update(id, count):
     con.commit()
     con.close()
 
+def get_len_cart(user_id):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    id = cur.execute("SELECT id FROM Carts WHERE user_id=?", (user_id,)).fetchall()
+    con.commit()
+    con.close()
+    return len(id)
+
+def product_in_cart(cart_id, product_id):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    count = cur.execute("SELECT count FROM Carts WHERE id=? AND item_id=?", (cart_id, product_id)).fetchone()
+    con.close()
+    if count == None:
+        return 0
+    else:
+        return count[0]
+
+def delete_data():
+    files = os.listdir("static/products")
+    for file in files:
+        os.remove("static/products/" + file)
+    os.remove("data.bd")
+
 if __name__ == "__main__":
     create_data()
     #add_concert(date="2026-04-15", time="15-30", city="Novosibirsk", location="Ул.Татьяны-Снежиной, 51, кв.52", count=10)
     #add_concert(date="04-25", time="15-00", city="Novosibirsk", location="Ул.Татьяны-Снежиной, 51, кв.52")
     print(get_concerts())
+    if input("delete database? Y/N ") == "Y":
+        delete_data()

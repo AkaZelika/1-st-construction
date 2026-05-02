@@ -3,13 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/productinfo.css') }}">
     <title>Document</title>
 </head>
 <body>
     <div class="top">
         <h1>1-ая конструкция</h1>
         <div>
+            {% if admin == 0 %}
+                <a href="/add_product">Добавить мерч</a>
+                <a href="/add_ticket">добавить концерт</a>
+            {% endif %}
             <a href="/shop">Мерч</a>
+            <a href="/cart">Карзина</a>
             <a href="/login">Войти</a>
         </div>
     </div>
@@ -18,6 +24,7 @@
     <p>{{ product_info[3] }}</p>
     <p>{{ product_info[4] }}</p>
     <p>{{ product_info[5] }}</p>
-    <a href="/{{ product_info[0] }}"><button>Добавить в корзину</button></a>
+    <p>count: {{ count }}</p>
+    <a href="/add_to_cart/{{ product_info[0] }}"><button>Добавить в корзину</button></a>
 </body>
 </html>

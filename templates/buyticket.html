@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buyticket.css') }}">
     <title>Покупка билетов</title>
 </head>
 <body>
+    <div class="top">
+        <h1>1-ая конструкция</h1>
+        <div>
+            {% if admin == 0 %}
+                <a href="/add_product">Добавить мерч</a>
+                <a href="/add_ticket">добавить концерт</a>
+            {% endif %}
+            <a href="/shop">Мерч</a>
+            <a href="/cart">Карзина</a>
+            <a href="/login">Войти</a>
+        </div>
+    </div>
     {% for info in ticket_info %}
         <p>{{info}}</p>
     {% endfor %}
