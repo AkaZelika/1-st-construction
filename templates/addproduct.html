@@ -10,33 +10,39 @@
     <div class="top">
         <h1>1-ая конструкция</h1>
         <div>
-            {% if admin == 0 %}
+            {% if admin.key == 1 %}
                 <a href="/add_product">Добавить мерч</a>
                 <a href="/add_ticket">добавить концерт</a>
             {% endif %}
             <a href="/shop">Мерч</a>
             <a href="/cart">Карзина</a>
-            <a href="/login">Войти</a>
+            {% if admin.id %}
+                <a href="/loguot">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+            {% endif %}
         </div>
     </div>
-    <h1>Добавление товара</h1>
-    <form action="/add_product" method="post" enctype="multipart/form-data">
-        <label for="name">Название:</label>
-        <input type="text" name="name" id="name" required>
-        <br><br>
-        <label for="price">Цена:</label>
-        <input type="number" name="price" id="price" required>
-        <br><br>
-        <label for="count">Количество:</label>
-        <input type="number" name="count" id="count" required>
-        <br><br>
-        <label for="description">Описание:</label>
-        <textarea name="description" id="description" required></textarea>
-        <br><br>
-        <label for="image">Изображение:</label>
-        <input type="file" name="image" id="image" required>
-        <br><br>
-        <input type="submit" value="Добавить товар">
-    </form>
+    <div class="add-product">
+        <h1>Добавление товара</h1>
+        <form action="/add_product" method="post" enctype="multipart/form-data">
+            <label for="name">Название:</label>
+            <input type="text" name="name" id="name" required>
+            <br><br>
+            <label for="price">Цена:</label>
+            <input type="number" name="price" id="price" required>
+            <br><br>
+            <label for="count">Количество:</label>
+            <input type="number" name="count" id="count" required>
+            <br><br>
+            <label for="description">Описание:</label>
+            <textarea name="description" id="description" required></textarea>
+            <br><br>
+            <label for="image">Изображение:</label>
+            <input type="file" name="image" id="image" required>
+            <br><br>
+            <input type="submit" value="Добавить товар">
+        </form>
+    </div>
 </body>
 </html>

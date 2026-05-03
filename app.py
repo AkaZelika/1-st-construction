@@ -9,6 +9,7 @@ app.secret_key = "trekjse654hlwdkhfoscvnourhgmxbkruthowednfrh0w3948yv65thde3455v
 UPLOAD_FOLDER = "static\products"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+#Создание сесии для только зашедшего пользователя
 def create_session():
     pattern = session.get("user", {})
     if not pattern:
@@ -16,6 +17,7 @@ def create_session():
         session["user"] = pattern
     return pattern
 
+#Главная страница
 @app.route("/")
 def timetable():
     pattern = session.get("user", {})
@@ -28,6 +30,7 @@ def timetable():
     concerts = database.get_concerts()
     return render_template("timetable.html", concerts=concerts, admin=pattern["data"])
 
+#Регестрация/вход
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method=="POST":
@@ -49,21 +52,25 @@ def login():
             else:
                 city = request.form["city"]
                 database.user_login(email, city)
-                pattern["data"]["id"] = database.get_user(email, info="id")
+                pattern["data"]["id"] = database.get_user(email, info="id")[0]
                 pattern["data"]["email"] = email
                 pattern["data"]["city"] = city
             session["user"] = pattern
-            return render_template("timetable.html", admin=session.get("user", {})["data"]["key"])
+            #return render_template("timetable.html", admin=session.get("user", {})["data"]["key"])
+            return redirect(url_for("timetable"))
         else:
             return render_template("userlogin.html", errors=errors)
     else:
         return render_template("userlogin.html")
 
+#Выход из сессии
 @app.route("/logout")
 def logout():
     session.clear()
+    create_session()
     return redirect(url_for("timetable"))
 
+#Мерч магазин
 @app.route("/shop")
 def shop():
     cart = session.get("user", {})["cart"]["product"]
@@ -71,8 +78,9 @@ def shop():
     for id in cart:
         in_cart.append(database.get_cart_product(cart[id])[2])
     products = database.get_items()
-    return render_template("shop.html", products=products, in_cart=in_cart, admin=session.get("user", {})["data"]["key"])
+    return render_template("shop.html", products=products, in_cart=in_cart, admin=session.get("user", {})["data"])
 
+#Добавить мерч
 @app.route("/add_product", methods=["GET", "POST"])
 def add_product():
     if request.method == "POST":
@@ -88,19 +96,23 @@ def add_product():
 
         database.add_item(name=name, price=price, image=image_path, description=description, count=count)
         print("save")
-        return redirect(url_for("shop"), admin=session.get("user", {})["data"]["key"])
+        return redirect(url_for("shop"))
     else:
-        return render_template("addproduct.html", admin=session.get("user", {})["data"]["key"])
+        return render_template("addproduct.html", admin=session.get("user", {})["data"])
     
+#Информация о мерче
 @app.route("/product/<product_name>/<int:product_id>")
 def product(product_name, product_id):
     cart = session.get("user", {})["cart"]["product"]
-    for id in cart:
-        count = database.product_in_cart(cart[id], product_id)
-        print(count)
+    if cart:
+        for id in cart:
+            count = database.product_in_cart(cart[id], product_id)
+    else:
+        count = 0
     product_info = database.get_item(product_id, product_name)
-    return render_template("productinfo.html", product_info=product_info, count=count, admin=session.get("user", {})["data"]["key"])
-    
+    return render_template("productinfo.html", product_info=product_info, count=count, admin=session.get("user", {})["data"])
+
+#Добавить в карзину
 @app.route("/add_to_cart/<int:product_id>")
 def add_to_cart(product_id):
     user = session.get("user", {})
@@ -111,11 +123,13 @@ def add_to_cart(product_id):
     session["user"] = user
     return redirect(url_for("shop"))
 
+#Информация о билете
 @app.route("/ticket/<int:ticket_id>")
 def buy_ticket(ticket_id):
     ticket_info = database.get_ticket(int(ticket_id))
-    return render_template("buyticket.html", ticket_info=ticket_info, admin=session.get("user", {})["data"]["key"])
+    return render_template("buyticket.html", ticket_info=ticket_info, admin=session.get("user", {})["data"])
 
+#Добавить новый концерт
 @app.route("/add_concert", methods=["GET", "POST"])
 def add_concert():
     if request.method == "POST":
@@ -127,6 +141,6 @@ def add_concert():
         database.add_concert(date, time, city, location, count_ticket)
         return redirect(url_for("timetable"))
     else:
-        return render_template("addconcert.html", admin=session.get("user", {})["data"]["key"])
+        return render_template("addconcert.html", admin=session.get("user", {})["data"])
 
 app.run(debug=True)

@@ -1,5 +1,25 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    position: static;
+}
+
 .top {
     width: 100%;
     position: fixed;
     background-color: antiquewhite;
+}
+
+.top h1 {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+}
+
+.product {
+    display: flex;
+    padding-top: 5%;
+    padding-left: 10px;
+    padding-right: 10px;
 }

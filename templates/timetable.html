@@ -16,8 +16,11 @@
             {% endif %}
             <a href="/shop">Мерч</a>
             <a href="/cart">Карзина</a>
-            
-            <a href="/login">Войти</a>
+            {% if admin.id %}
+                <a href="/loguot">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+            {% endif %}
         </div>
     </div>
     <div class="group-icon">
