@@ -129,7 +129,7 @@ def buy_ticket(type_id, user_id, consert_id):
     con.commit()
     con.close()
 
-def buy_product(user_id, item_id, count=1):
+def buy_product(item_id, user_id="", count=1):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
     cur.execute("INSERT INTO Carts (user_id, item_id, count) VALUES (?, ?, ?)", (user_id, item_id, count))
