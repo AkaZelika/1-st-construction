@@ -1,5 +1,6 @@
 import sqlite3, os
 
+#Создает бд
 def create_data():
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -63,7 +64,15 @@ def create_data():
         con.commit()
 
     con.close()
+    
+#Удаляет бд
+def delete_data():
+    files = os.listdir("static/products")
+    for file in files:
+        os.remove("static/products/" + file)
+    os.remove("data.bd")
 
+#Добавляет в концерты новый объект
 def add_concert(date, time, city, location, count=0):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -72,13 +81,15 @@ def add_concert(date, time, city, location, count=0):
     con.commit()
     con.close()
 
+#Выводит всю таблицу концертов
 def get_concerts():
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
-    concerts = cur.execute("SELECT * FROM Concerts").fetchall()
+    concerts = cur.execute("SELECT * FROM Concerts ORDER BY date").fetchall()
     con.close()
     return concerts
 
+#Берет все об одном концерте
 def get_ticket(concert_id):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -86,6 +97,7 @@ def get_ticket(concert_id):
     con.close()
     return ticket_info
 
+#Добавляет один предмет мерча в магазин
 def add_item(name, price, image="", description="", count=0):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -94,6 +106,7 @@ def add_item(name, price, image="", description="", count=0):
     con.commit()
     con.close()
 
+#Достает все что лежит в item
 def get_items():
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -101,6 +114,7 @@ def get_items():
     con.close()
     return concerts
 
+#Берет всю информацию об определенном предмете
 def get_item(item_id, item_name):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -108,6 +122,7 @@ def get_item(item_id, item_name):
     con.close()
     return item_info
 
+#Добавляет пользователя
 def user_login(email, city):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -115,13 +130,15 @@ def user_login(email, city):
     con.commit()
     con.close()
 
-def get_user(email, info=""):
+#Достает всю или определенную информацию о пользователе
+def get_user(email, info="*"):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
     user_acc = cur.execute(f"SELECT {info} FROM Users WHERE email=?", (email,)).fetchone()
     con.close()
     return user_acc
 
+#Добавить билет 
 def buy_ticket(type_id, user_id, consert_id):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -129,6 +146,7 @@ def buy_ticket(type_id, user_id, consert_id):
     con.commit()
     con.close()
 
+#Добавить в корзину предмет и вернуть id
 def buy_product(item_id, user_id="", count=1):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -139,6 +157,7 @@ def buy_product(item_id, user_id="", count=1):
     con.close()
     return product_id[0]
 
+# все продукты в корзине
 def get_cart_product(cart_id):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -147,6 +166,20 @@ def get_cart_product(cart_id):
     con.close()
     return product_id
 
+#
+def get_product_in_cart(cart_id):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    cur.execute("""SELECT Carts.item_id, Items.name, Items.image, Carts.count, Items.count, Items.price FROM Carts 
+                    INNER JOIN Items 
+                    ON Carts.item_id = Items.id
+                    WHERE Carts.id=?
+                    ORDER BY Carts.id DESC""", (cart_id,))
+    product_info = cur.fetchone()
+    con.close()
+    return product_info
+
+# обновить число продуктов в карзине
 def cart_update(id, count):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -157,6 +190,7 @@ def cart_update(id, count):
     con.commit()
     con.close()
 
+#сколько продуктов в корзине
 def get_len_cart(user_id):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -165,6 +199,7 @@ def get_len_cart(user_id):
     con.close()
     return len(id)
 
+#сколько продукта в корзине
 def product_in_cart(cart_id, product_id):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
@@ -174,12 +209,6 @@ def product_in_cart(cart_id, product_id):
         return 0
     else:
         return count[0]
-
-def delete_data():
-    files = os.listdir("static/products")
-    for file in files:
-        os.remove("static/products/" + file)
-    os.remove("data.bd")
 
 if __name__ == "__main__":
     create_data()

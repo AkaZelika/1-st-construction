@@ -15,15 +15,12 @@ def create_session():
     if not pattern:
         pattern = {"data":{"key":0}, "cart":{"product":{}, "ticket":{}}}
         session["user"] = pattern
-    print(pattern)
     return pattern
 
 #Главная страница
 @app.route("/")
 def timetable():
-    print(1, session.get("user", {}))
-    print(2, session.get("user", {})["data"])
-    print(3, session.get("user", {})["cart"])
+    print(1, create_session())
     concerts = database.get_concerts()
     return render_template("timetable.html", concerts=concerts, admin=create_session()["data"])
 
@@ -42,18 +39,17 @@ def login():
                 pattern["data"]["id"] = user_data[0]
                 pattern["data"]["email"] = email
                 pattern["data"]["city"] = user_data[1]
-                if email in admin:
-                    pattern["data"]["key"] = 1
-                else:
-                    pattern["data"]["key"] = 0
             else:
                 city = request.form["city"]
                 database.user_login(email, city)
                 pattern["data"]["id"] = database.get_user(email, info="id")[0]
                 pattern["data"]["email"] = email
                 pattern["data"]["city"] = city
+            if email in admin:
+                pattern["data"]["key"] = 1
+            else:
+                pattern["data"]["key"] = 0
             session["user"] = pattern       #Добавить обновление корзины для только залогиненых
-            #return render_template("timetable.html", admin=session.get("user", {})["data"]["key"])
             return redirect(url_for("timetable"))
         else:
             return render_template("userlogin.html", errors=errors)
@@ -65,7 +61,7 @@ def login():
 def logout():
     session.clear()
     create_session()
-    return redirect(url_for("userlogin"))
+    return redirect(url_for("timetable"))
 
 #Мерч магазин
 @app.route("/shop")
@@ -117,11 +113,22 @@ def add_to_cart(product_id):
     if user["data"]["id"]:
         user_id = user["data"]["id"]
     cart = user["cart"]["product"]
+    print(user_id, product_id, cart)
     
-    cart[int(len(cart)+1)] = database.buy_product(user_id=user_id, product_id=product_id)
+    cart[str(len(cart)+1)] = database.buy_product(user_id=user_id, item_id=int(product_id))
+    print(cart)
     session["user"] = user
-    print(user, user_id, cart,)
+    print(user, user_id)
     return redirect(url_for("shop"))
+
+@app.route("/cart")
+def cart():
+    user_cart = session.get("user", {})["cart"]
+    in_cart = {"product":{}, "ticket":{}}
+    for id in user_cart["product"]:
+        in_cart["product"][id] = database.get_product_in_cart(int(id))
+    print(in_cart)
+    return render_template("cart.html", admin=create_session()["data"], in_cart=in_cart)
 
 #Информация о билете
 @app.route("/ticket/<int:ticket_id>")
