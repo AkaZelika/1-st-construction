@@ -183,8 +183,9 @@ def get_product_in_cart(cart_id):
 def cart_update(id, count):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
-    if count > 0:
-        cur.execute("UPDATE Carts SET count = ? WHERE id = ?", (count, id))
+    
+    if count>0:
+        cur.execute("UPDATE Carts SET count =? WHERE id =?", (count, id))
     else:
         cur.execute("DELETE Carts WHERE id = ?", (id,))
     con.commit()
@@ -209,6 +210,17 @@ def product_in_cart(cart_id, product_id):
         return 0
     else:
         return count[0]
+"""
+def validate(ttype, sdict):
+    con = sqlite3.connect("data.bd")
+    cur = con.cursor()
+    for i in sdict:
+        if ttype=="cart-products":
+            product = cur.execute("SELECT * FROM Carts WHERE id=?", (i)).fetchone()
+            if not product:
+                del sdict
+    return sdict
+    """
 
 if __name__ == "__main__":
     create_data()

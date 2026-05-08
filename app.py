@@ -125,10 +125,24 @@ def add_to_cart(product_id):
 def cart():
     user_cart = session.get("user", {})["cart"]
     in_cart = {"product":{}, "ticket":{}}
+    #in_cart = database.validate("cart-products", user_cart)
     for id in user_cart["product"]:
         in_cart["product"][id] = database.get_product_in_cart(int(id))
     print(in_cart)
     return render_template("cart.html", admin=create_session()["data"], in_cart=in_cart)
+
+@app.route("/update_cart", methods=["POST"])
+def update_cart():
+    cart_id = request.form["product_id"]
+    action = request.form["action"]
+    count = int(request.form["count"])
+    print(cart_id, action)
+    if action=="+":
+        count+=1
+    else:
+        count-=1
+    database.cart_update(cart_id, count)
+    return redirect(url_for("cart"))
 
 #Информация о билете
 @app.route("/ticket/<int:ticket_id>")
