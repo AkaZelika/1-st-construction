@@ -1,93 +1,4 @@
-import sqlite3, os
-
-#Создает бд
-def create_data():
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    users = """
-        CREATE TABLE IF NOT EXISTS Users(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT NOT NULL,
-            city TEXT NOT NULL
-        )
-    """
-    concerts = """
-        CREATE TABLE IF NOT EXISTS Concerts(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date DATE NOT NULL,
-            time TIME NOT NULL,
-            city TEXT NOT NULL,
-            location TEXT,
-            count INTEGER
-        )
-    """ #date=YYYY-MM-DD; time=hh-mm-ss
-    items = """
-        CREATE TABLE IF NOT EXISTS Items(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            image TEXT,
-            name TEXT NOT NULL,
-            price INTEGER NOT NULL,
-            descriptoin TEXT,
-            count INTEGER
-        )
-    """
-    type_ticket = """
-        CREATE TABLE IF NOT EXISTS Type_ticket(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL
-        )
-    """
-    carts = """
-        CREATE TABLE IF NOT EXISTS Carts(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            item_id INTEGER,
-            count INTEGER,
-            FOREIGN KEY (user_id) REFERENCES Users (id),
-            FOREIGN KEY (item_id) REFERENCES Items (id)
-        )
-    """
-    ticket = """
-        CREATE TABLE IF NOT EXISTS Ticket(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            type_id INTEGER,
-            user_id INTEGER,
-            concert_id INTEGER,
-            FOREIGN KEY (type_id) REFERENCES Type_ticket (id),
-            FOREIGN KEY (user_id) REFERENCES Users (id),
-            FOREIGN KEY (concert_id) REFERENCES Concerts (id)
-        )
-    """
-    codes = [users, concerts, items, type_ticket, carts, ticket]
-    for code in codes:
-        cur.execute(code)
-        con.commit()
-
-    con.close()
-    
-#Удаляет бд
-def delete_data():
-    files = os.listdir("static/products")
-    for file in files:
-        os.remove("static/products/" + file)
-    os.remove("data.bd")
-
-#Добавляет в концерты новый объект
-def add_concert(date, time, city, location, count=0):
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    cur.execute("INSERT INTO Concerts (date, time, city, location, count) VALUES (?, ?, ?, ?, ?)", 
-                (date, time, city, location, count))
-    con.commit()
-    con.close()
-
-#Выводит всю таблицу концертов
-def get_concerts():
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    concerts = cur.execute("SELECT * FROM Concerts ORDER BY date").fetchall()
-    con.close()
-    return concerts
+import sqlite3, os   
 
 #Берет все об одном концерте
 def get_ticket(concert_id):
@@ -97,23 +8,6 @@ def get_ticket(concert_id):
     con.close()
     return ticket_info
 
-#Добавляет один предмет мерча в магазин
-def add_item(name, price, image="", description="", count=0):
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    cur.execute("INSERT INTO Items (image, name, price, descriptoin, count) VALUES (?, ?, ?, ?, ?)", 
-                (image, name, price, description, count))
-    con.commit()
-    con.close()
-
-#Достает все что лежит в item
-def get_items():
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    concerts = cur.execute("SELECT * FROM Items").fetchall()
-    con.close()
-    return concerts
-
 #Берет всю информацию об определенном предмете
 def get_item(item_id, item_name):
     con = sqlite3.connect("data.bd")
@@ -121,41 +15,6 @@ def get_item(item_id, item_name):
     item_info = cur.execute("SELECT * FROM Items WHERE id=? AND name=?", (item_id, item_name)).fetchone()
     con.close()
     return item_info
-
-#Добавляет пользователя
-def user_login(email, city):
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    cur.execute("INSERT INTO Users (email, city) VALUES (?, ?)", (email, city))
-    con.commit()
-    con.close()
-
-#Достает всю или определенную информацию о пользователе
-def get_user(email, info="*"):
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    user_acc = cur.execute(f"SELECT {info} FROM Users WHERE email=?", (email,)).fetchone()
-    con.close()
-    return user_acc
-
-#Добавить билет 
-def buy_ticket(type_id, user_id, consert_id):
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    cur.execute("INSERT INTO Ticket (type_id, user_id, consert_id) VALUES (?, ?, ?)", (type_id, user_id, consert_id))
-    con.commit()
-    con.close()
-
-#Добавить в корзину предмет и вернуть id
-def buy_product(item_id, user_id="", count=1):
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    cur.execute("INSERT INTO Carts (user_id, item_id, count) VALUES (?, ?, ?)", (user_id, item_id, count))
-    con.commit()
-    cur.execute("SELECT id FROM Carts WHERE user_id=? AND item_id=?", (user_id, item_id))
-    product_id = cur.fetchone()
-    con.close()
-    return product_id[0]
 
 # все продукты в корзине
 def get_cart_product(cart_id):
@@ -210,22 +69,223 @@ def product_in_cart(cart_id, product_id):
         return 0
     else:
         return count[0]
-"""
-def validate(ttype, sdict):
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    for i in sdict:
-        if ttype=="cart-products":
-            product = cur.execute("SELECT * FROM Carts WHERE id=?", (i)).fetchone()
-            if not product:
-                del sdict
-    return sdict
-    """
+
+class Database:
+    def __init__(self):
+        self.bd_name = "data.bd"
+        self.con = sqlite3.connect(self.bd_name)
+        self.cur = self.con.cursor()
+
+    def create(self):
+        users = """
+            CREATE TABLE IF NOT EXISTS Users(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT NOT NULL,
+                city TEXT NOT NULL
+            )
+        """
+        concerts = """
+            CREATE TABLE IF NOT EXISTS Concerts(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date DATE NOT NULL,
+                time TIME NOT NULL,
+                city TEXT NOT NULL,
+                location TEXT,
+                count INTEGER
+            )
+        """ #date=YYYY-MM-DD; time=hh-mm-ss
+        items = """
+            CREATE TABLE IF NOT EXISTS Items(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                image TEXT,
+                name TEXT NOT NULL,
+                price INTEGER NOT NULL,
+                description TEXT,
+                count INTEGER
+            )
+        """
+        type_ticket = """
+            CREATE TABLE IF NOT EXISTS Type_ticket(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL
+            )
+        """
+        carts = """
+            CREATE TABLE IF NOT EXISTS Carts(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                item_id INTEGER,
+                count INTEGER,
+                FOREIGN KEY (user_id) REFERENCES Users (id),
+                FOREIGN KEY (item_id) REFERENCES Items (id)
+            )
+        """
+        ticket = """
+            CREATE TABLE IF NOT EXISTS Ticket(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                type_id INTEGER,
+                user_id INTEGER,
+                concert_id INTEGER,
+                FOREIGN KEY (type_id) REFERENCES Type_ticket (id),
+                FOREIGN KEY (user_id) REFERENCES Users (id),
+                FOREIGN KEY (concert_id) REFERENCES Concerts (id)
+            )
+        """
+        codes = [users, concerts, items, type_ticket, carts, ticket]
+        for code in codes:
+            self.cur.execute(code)
+            self.con.commit()
+
+    def get_users(self, option="*"):
+        accout = self.cur.execute(f"SELECT {option} FROM Users").fetchall()
+        return accout
+    
+    def get_concerts(self, option="*"):
+        accout = self.cur.execute(f"SELECT {option} FROM Concerts ORDER BY date").fetchall()
+        return accout
+    
+    def get_items(self, option="*"):
+        accout = self.cur.execute(f"SELECT {option} FROM Items").fetchall()
+        return accout
+    
+    def get_type_ticket(self, option="*"):
+        accout = self.cur.execute(f"SELECT {option} FROM Type_ticket").fetchall()
+        return accout
+    
+    def get_carts(self, option="*"):
+        accout = self.cur.execute(f"SELECT {option} FROM Carts").fetchall()
+        return accout
+    
+    def get_ticket(self, option="*"):
+        accout = self.cur.execute(f"SELECT {option} FROM Ticket").fetchall()
+        return accout
+
+class Users(Database):
+    def __init__(self, email, city=""):
+        self.bd_name = "data.bd"
+        self.con = sqlite3.connect(self.bd_name)
+        self.cur = self.con.cursor()
+        self.email = email
+        self.city = city
+        self.id = self.cur.execute("SELECT id FROM Users WHERE email=?", (self.email,)).fetchone()
+        if self.id:
+            self.id = self.id[0]
+    
+    def add(self):
+        if not self.id:
+            self.cur.execute("INSERT INTO Users (email, city) VALUES (?, ?)", (self.email, self.city))
+            self.con.commit()
+            self.id = self.cur.execute("SELECT id FROM Users WHERE email=?", (self.email,)).fetchone()[0]
+            return self.id
+        else:
+            return "user registred"
+    
+    def get(self, option="*"):
+        accout = self.cur.execute(f"SELECT {option} FROM Users WHERE email=?", (self.email,)).fetchone()
+        return accout
+
+class Concerts(Database):
+    def __init__(self, date, time, city, location, count):
+        self.bd_name = "data.bd"
+        self.con = sqlite3.connect(self.bd_name)
+        self.cur = self.con.cursor()
+        self.date = date
+        self.time = time
+        self.city = city
+        self.location = location
+        self.count = count
+
+    def add(self):
+        self.cur.execute("INSERT INTO Concerts (date, time, city, location, count) VALUES (?, ?, ?, ?, ?)", 
+                (self.date, self.time, self.city, self.location, self.count))
+        self.con.commit()
+
+    def delete(self):
+        self.cur.execute()
+        self.con.commit()
+
+class Items(Database):
+    def __init__(self, name, price, image="", description="", count=0):
+        self.bd_name = "data.bd"
+        self.con = sqlite3.connect(self.bd_name)
+        self.cur = self.con.cursor()
+        self.image = image
+        self.name = name
+        self.price = price
+        self.description = description
+        self.count = count
+
+    def add(self):
+        self.cur.execute("INSERT INTO Items (image, name, price, description, count) VALUES (?, ?, ?, ?, ?)", 
+                (self.image, self.name, self.price, self.description, self.count))
+        self.con.commit()
+
+    def delete(self):
+        self.cur.execute()
+        self.con.commit()
+
+class Type_ticket(Database):
+    def __init__(self, name):
+        self.bd_name = "data.bd"
+        self.con = sqlite3.connect(self.bd_name)
+        self.cur = self.con.cursor()
+        self.name = name
+
+    def add(self):
+        self.cur.execute("INSERT INTO Type_ticket (name) VALUES (?,)", (self.name,))
+        self.con.commit()
+    
+    def delete(self):
+        self.cur.execute()
+        self.con.commit()
+
+class Carts(Database):
+    def __init__(self, item_id, user_id="NULL", count=1):
+        self.bd_name = "data.bd"
+        self.con = sqlite3.connect(self.bd_name)
+        self.cur = self.con.cursor()
+        self.user_id = user_id
+        self.item_id = item_id
+        self.count = count
+        self.id = self.cur.execute("SELECT id FROM Carts WHERE user_id=? AND item_id=?", (self.user_id, self.item_id)).fetchone()
+        if self.id:
+            self.id = self.id[0]
+
+    def add(self):
+        self.cur.execute("INSERT INTO Carts (user_id, item_id, count) VALUES (?, ?, ?)", (self.user_id, self.item_id, self.count))
+        self.con.commit()
+        self.id = self.cur.execute("SELECT id FROM Carts WHERE user_id=? AND item_id=?", (self.user_id, self.item_id)).fetchone()[0]
+        return self.id
+
+    def delete(self):
+        self.cur.execute("DELETE Carts WHERE id = ?", (self.id,))
+        self.con.commit()
+
+class Ticket(Database):
+    def __init__(self, type_id, user_id, concert_id):
+        self.bd_name = "data.bd"
+        self.con = sqlite3.connect(self.bd_name)
+        self.cur = self.con.cursor()
+        self.type_id = type_id
+        self.user_id = user_id
+        self.concert_id = concert_id
+    
+    def add(self):
+        self.cur.execute("INSERT INTO Ticket (type_id, user_id, consert_id) VALUES (?, ?, ?)", (self.type_id, self.user_id, self.consert_id))
+        self.con.commit()
+    
+    def delete(self):
+        self.cur.execute()
+        self.con.commit()
+
 
 if __name__ == "__main__":
-    create_data()
-    #add_concert(date="2026-04-15", time="15-30", city="Novosibirsk", location="Ул.Татьяны-Снежиной, 51, кв.52", count=10)
-    #add_concert(date="04-25", time="15-00", city="Novosibirsk", location="Ул.Татьяны-Снежиной, 51, кв.52")
-    print(get_concerts())
-    if input("delete database? Y/N ") == "Y":
-        delete_data()
+    if os.path.exists("data.bd"):
+        if input("delete database? Y/N ") == "Y":
+            files = os.listdir("static/products")
+            for file in files:
+                os.remove("static/products/" + file)
+            os.remove(os.path.abspath("data.bd"))
+    else:
+        bd = Database()
+        bd.create()

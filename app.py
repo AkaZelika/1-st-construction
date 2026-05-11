@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import database
+from database import *
 from werkzeug.utils import secure_filename
 import os
 
@@ -21,7 +21,7 @@ def create_session():
 @app.route("/")
 def timetable():
     print(1, create_session())
-    concerts = database.get_concerts()
+    concerts = Database().get_concerts()
     return render_template("timetable.html", concerts=concerts, admin=create_session()["data"])
 
 #Регестрация/вход
@@ -30,25 +30,28 @@ def login():
     if request.method=="POST":
         admin = ["romanche0800@gmail.com"]
         errors = []
-        pattern = session.get("user", {"data":{}, "cart":{"product":{}, "ticket":{}}})  #{
-        type_login = request.form["type"]                                                   #"data":{"id":int, "email":str, "city":str, "key":int}, 
-        email = request.form["email"]                                                       #"cart":{"product":{id:product_id, ...}, 
-        if len(errors)==0:                                                                  #"ticket":{id:ticket_id, ...}}
-            if type_login=="login":                                                     #}
-                user_data = database.get_user(email, info="id, city")
-                pattern["data"]["id"] = user_data[0]
-                pattern["data"]["email"] = email
-                pattern["data"]["city"] = user_data[1]
-            else:
-                city = request.form["city"]
-                database.user_login(email, city)
-                pattern["data"]["id"] = database.get_user(email, info="id")[0]
-                pattern["data"]["email"] = email
+
+        type_login = request.form["type"]
+        email = request.form["email"]
+        pattern = create_session()
+        pattern["data"]["email"] = email
+
+        if type_login=="login": 
+            user = Users(email).get("id, city")
+            pattern["data"]["id"] = user[0]
+            pattern["data"]["city"] = user[1]
+        else:
+            city = request.form["city"]
+            user = Users(email, city).add()
+            if type(user)=="<class 'int'>":
+                pattern["data"]["id"] = user
                 pattern["data"]["city"] = city
-            if email in admin:
-                pattern["data"]["key"] = 1
             else:
-                pattern["data"]["key"] = 0
+                errors.append("Пользователь зарегестрирован")
+        if email in admin:
+            pattern["data"]["key"] = 1
+
+        if len(errors)==0:
             session["user"] = pattern       #Добавить обновление корзины для только залогиненых
             return redirect(url_for("timetable"))
         else:
@@ -69,8 +72,8 @@ def shop():
     cart = session.get("user", {})["cart"]["product"]
     in_cart = []
     for id in cart:
-        in_cart.append(database.get_cart_product(cart[id])[2])
-    products = database.get_items()
+        in_cart.append(get_cart_product(cart[id])[2])#######################################
+    products = Database().get_items()
     return render_template("shop.html", products=products, in_cart=in_cart, admin=create_session()["data"])
 
 #Добавить мерч
@@ -87,7 +90,7 @@ def add_product():
         image_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         image.save(image_path)
 
-        database.add_item(name=name, price=price, image=image_path, description=description, count=count)
+        Items(name=name, price=price, image=image_path, description=description, count=count).add()
         print("save")
         return redirect(url_for("shop"))
     else:
@@ -99,10 +102,10 @@ def product(product_name, product_id):
     cart = session.get("user", {})["cart"]["product"]
     if cart:
         for id in cart:
-            count = database.product_in_cart(cart[id], product_id)
+            count = product_in_cart(cart[id], product_id)#######################################
     else:
         count = 0
-    product_info = database.get_item(product_id, product_name)
+    product_info = get_item(product_id, product_name)#######################################
     return render_template("productinfo.html", product_info=product_info, count=count, admin=create_session()["data"])
 
 #Добавить в карзину
@@ -115,7 +118,7 @@ def add_to_cart(product_id):
     cart = user["cart"]["product"]
     print(user_id, product_id, cart)
     
-    cart[str(len(cart)+1)] = database.buy_product(user_id=user_id, item_id=int(product_id))
+    cart[str(len(cart)+1)] = Carts(user_id=user_id, item_id=int(product_id)).add()
     print(cart)
     session["user"] = user
     print(user, user_id)
@@ -127,7 +130,7 @@ def cart():
     in_cart = {"product":{}, "ticket":{}}
     #in_cart = database.validate("cart-products", user_cart)
     for id in user_cart["product"]:
-        in_cart["product"][id] = database.get_product_in_cart(int(id))
+        in_cart["product"][id] = get_product_in_cart(int(id))#######################################
     print(in_cart)
     return render_template("cart.html", admin=create_session()["data"], in_cart=in_cart)
 
@@ -141,13 +144,13 @@ def update_cart():
         count+=1
     else:
         count-=1
-    database.cart_update(cart_id, count)
+    cart_update(cart_id, count)#######################################
     return redirect(url_for("cart"))
 
 #Информация о билете
 @app.route("/ticket/<int:ticket_id>")
 def buy_ticket(ticket_id):
-    ticket_info = database.get_ticket(int(ticket_id))
+    ticket_info = get_ticket(int(ticket_id))#######################################
     return render_template("buyticket.html", ticket_info=ticket_info, admin=create_session()["data"])
 
 #Добавить новый концерт
@@ -159,7 +162,7 @@ def add_concert():
         city = request.form["city"]
         location = request.form["location"]
         count_ticket = request.form["count_ticket"]
-        database.add_concert(date, time, city, location, count_ticket)
+        Concerts.add(date, time, city, location, count_ticket)
         return redirect(url_for("timetable"))
     else:
         return render_template("addconcert.html", admin=create_session()["data"])
