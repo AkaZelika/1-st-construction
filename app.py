@@ -127,30 +127,46 @@ def add_to_cart(product_id):
 @app.route("/cart")
 def cart():
     user_cart = session.get("user", {})["cart"]
+    print(user_cart)
     in_cart = {"product":{}, "ticket":{}}
     #in_cart = database.validate("cart-products", user_cart)
     for id in user_cart["product"]:
-        in_cart["product"][id] = get_product_in_cart(int(id))#######################################
+        in_cart["product"][id] = Carts(id=user_cart["product"][id]).get_info()
     print(in_cart)
     return render_template("cart.html", admin=create_session()["data"], in_cart=in_cart)
 
 @app.route("/update_cart", methods=["POST"])
 def update_cart():
+    user = session.get("user", {})
     cart_id = request.form["product_id"]
     action = request.form["action"]
     count = int(request.form["count"])
-    print(cart_id, action)
+    print(user["cart"]["product"][cart_id], action)
     if action=="+":
         count+=1
     else:
         count-=1
-    cart_update(cart_id, count)#######################################
+    #cart_update(cart_id, count)#######################################
+    Carts(id=user["cart"]["product"][cart_id]).update(count=count)
+    session["user"] = user
+    return redirect(url_for("cart"))
+
+@app.route("/delete_cart_product/<int:cart_id>")
+def delete_cart_product(cart_id):
+    user = session.get("user", {})
+    print(user)
+    for key in user["cart"]["product"]:
+        if user["cart"]["product"][key]==cart_id:
+            deleted = key
+    del user["cart"]["product"][deleted]
+    session["user"] = user
+    Database().delete_cart(cart_id)
     return redirect(url_for("cart"))
 
 #Информация о билете
 @app.route("/ticket/<int:ticket_id>")
 def buy_ticket(ticket_id):
-    ticket_info = get_ticket(int(ticket_id))#######################################
+    ticket_info = Database().get_concert(int(ticket_id))
     return render_template("buyticket.html", ticket_info=ticket_info, admin=create_session()["data"])
 
 #Добавить новый концерт
@@ -162,9 +178,11 @@ def add_concert():
         city = request.form["city"]
         location = request.form["location"]
         count_ticket = request.form["count_ticket"]
-        Concerts.add(date, time, city, location, count_ticket)
+        Concerts(date, time, city, location, count_ticket).add()
         return redirect(url_for("timetable"))
     else:
         return render_template("addconcert.html", admin=create_session()["data"])
+    
+
 
 app.run(debug=True)

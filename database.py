@@ -1,12 +1,4 @@
-import sqlite3, os   
-
-#Берет все об одном концерте
-def get_ticket(concert_id):
-    con = sqlite3.connect("data.bd")
-    cur = con.cursor()
-    ticket_info = cur.execute("SELECT * FROM Concerts WHERE id=?", (concert_id,)).fetchone()
-    con.close()
-    return ticket_info
+import sqlite3, os
 
 #Берет всю информацию об определенном предмете
 def get_item(item_id, item_name):
@@ -29,12 +21,13 @@ def get_cart_product(cart_id):
 def get_product_in_cart(cart_id):
     con = sqlite3.connect("data.bd")
     cur = con.cursor()
-    cur.execute("""SELECT Carts.item_id, Items.name, Items.image, Carts.count, Items.count, Items.price FROM Carts 
+    cur.execute("""SELECT Carts.item_id, Items.name, Items.image, Carts.count, Items.count, Items.price, Carts.id FROM Carts 
                     INNER JOIN Items 
                     ON Carts.item_id = Items.id
                     WHERE Carts.id=?
-                    ORDER BY Carts.id DESC""", (cart_id,))
+                    ORDER BY Carts.id DESC""", (int(cart_id),))
     product_info = cur.fetchone()
+    print(product_info)
     con.close()
     return product_info
 
@@ -137,28 +130,38 @@ class Database:
             self.con.commit()
 
     def get_users(self, option="*"):
-        accout = self.cur.execute(f"SELECT {option} FROM Users").fetchall()
-        return accout
+        accouts = self.cur.execute(f"SELECT {option} FROM Users").fetchall()
+        return accouts
     
     def get_concerts(self, option="*"):
-        accout = self.cur.execute(f"SELECT {option} FROM Concerts ORDER BY date").fetchall()
-        return accout
+        concerts = self.cur.execute(f"SELECT {option} FROM Concerts ORDER BY date").fetchall()
+        return concerts
     
     def get_items(self, option="*"):
-        accout = self.cur.execute(f"SELECT {option} FROM Items").fetchall()
-        return accout
+        items = self.cur.execute(f"SELECT {option} FROM Items").fetchall()
+        return items
     
     def get_type_ticket(self, option="*"):
-        accout = self.cur.execute(f"SELECT {option} FROM Type_ticket").fetchall()
-        return accout
+        types_ticket = self.cur.execute(f"SELECT {option} FROM Type_ticket").fetchall()
+        return types_ticket
     
     def get_carts(self, option="*"):
-        accout = self.cur.execute(f"SELECT {option} FROM Carts").fetchall()
-        return accout
+        carts = self.cur.execute(f"SELECT {option} FROM Carts").fetchall()
+        return carts
     
     def get_ticket(self, option="*"):
-        accout = self.cur.execute(f"SELECT {option} FROM Ticket").fetchall()
-        return accout
+        ticket = self.cur.execute(f"SELECT {option} FROM Ticket").fetchall()
+        return ticket
+    
+
+    def get_concert(self, id, option="*"):
+        concert = self.cur.execute(f"SELECT {option} FROM Concerts WHERE id=?", (id,)).fetchone()
+        return concert
+    
+
+    def delete_cart(self, id):
+        self.cur.execute("DELETE FROM Carts WHERE id=?", (id,))
+        self.con.commit()
 
 class Users(Database):
     def __init__(self, email, city=""):
@@ -240,25 +243,41 @@ class Type_ticket(Database):
         self.con.commit()
 
 class Carts(Database):
-    def __init__(self, item_id, user_id="NULL", count=1):
+    def __init__(self, item_id="NULL", user_id="NULL", count=1, id=()):
         self.bd_name = "data.bd"
         self.con = sqlite3.connect(self.bd_name)
         self.cur = self.con.cursor()
-        self.user_id = user_id
-        self.item_id = item_id
-        self.count = count
-        self.id = self.cur.execute("SELECT id FROM Carts WHERE user_id=? AND item_id=?", (self.user_id, self.item_id)).fetchone()
-        if self.id:
-            self.id = self.id[0]
-
+        if not id:
+            self.user_id = user_id
+            self.item_id = item_id
+            self.count = count
+            self.id = self.cur.execute("SELECT id FROM Carts WHERE user_id=? AND item_id=?", (self.user_id, self.item_id)).fetchone()
+            if self.id:
+                self.id = self.id[0]
+        else:
+            self.id = id
+            self.count = self.cur.execute("SELECT count FROM Carts WHERE id=?", (self.id,)).fetchone()[0]
+    
     def add(self):
         self.cur.execute("INSERT INTO Carts (user_id, item_id, count) VALUES (?, ?, ?)", (self.user_id, self.item_id, self.count))
         self.con.commit()
         self.id = self.cur.execute("SELECT id FROM Carts WHERE user_id=? AND item_id=?", (self.user_id, self.item_id)).fetchone()[0]
         return self.id
+    
+    def get_info(self):
+        self.cur.execute("""SELECT Carts.item_id, Items.name, Items.image, Carts.count, Items.count, Items.price, Carts.id FROM Carts 
+                    INNER JOIN Items 
+                    ON Carts.item_id = Items.id
+                    WHERE Carts.id=?
+                    ORDER BY Carts.id DESC""", (int(self.id),))
+        info = self.cur.fetchone()
+        return info
 
-    def delete(self):
-        self.cur.execute("DELETE Carts WHERE id = ?", (self.id,))
+    def update(self, count):
+        if count>0:
+            self.cur.execute(f"UPDATE Carts SET count={count} WHERE id =?", (self.id,))
+        else:
+            self.cur.execute("DELETE FROM Carts WHERE id = ?", (self.id,))
         self.con.commit()
 
 class Ticket(Database):

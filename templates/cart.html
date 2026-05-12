@@ -47,6 +47,7 @@
                             <input type="hidden" name="count" value="{{ products[product][3] }}">
                         </form>
                     </div>
+                    <a href="/delete_cart_product/{{ products[product][6] }}"><button>Убрать из корзины</button></a>
                     <div class="product-count">Осталось: {{ products[product][4] }}</div>
             </div>  
         {% endfor %}
