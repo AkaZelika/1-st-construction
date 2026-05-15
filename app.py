@@ -20,39 +20,47 @@ def create_session():
 #Главная страница
 @app.route("/")
 def timetable():
-    print(1, create_session())
+    print("sesson /",create_session())
     concerts = Database().get_concerts()
     return render_template("timetable.html", concerts=concerts, admin=create_session()["data"])
 
 #Регестрация/вход
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login", methods=["GET", "POST"])#
 def login():
     if request.method=="POST":
         admin = ["romanche0800@gmail.com"]
         errors = []
+        pattern = create_session()
 
         type_login = request.form["type"]
         email = request.form["email"]
-        pattern = create_session()
         pattern["data"]["email"] = email
+        city = request.form["city"]
+        user = Users(email, city)
 
-        if type_login=="login": 
-            user = Users(email).get("id, city")
-            pattern["data"]["id"] = user[0]
-            pattern["data"]["city"] = user[1]
+        if type_login=="login":
+            user_data = user.get("id, city")
+            pattern["data"]["id"] = user_data[0]
+            pattern["data"]["city"] = user_data[1]
         else:
-            city = request.form["city"]
-            user = Users(email, city).add()
-            if type(user)=="<class 'int'>":
+            if type(user.add())=="<class 'int'>":
                 pattern["data"]["id"] = user
-                pattern["data"]["city"] = city
+                if city:
+                    pattern["data"]["city"] = city
+                else:
+                    errors.append("Укажите свой город")
             else:
                 errors.append("Пользователь зарегестрирован")
+
+        carts = user.carts()
+        if carts:
+            pattern["cart"]["product"] = carts
+
         if email in admin:
             pattern["data"]["key"] = 1
 
         if len(errors)==0:
-            session["user"] = pattern       #Добавить обновление корзины для только залогиненых
+            session["user"] = pattern
             return redirect(url_for("timetable"))
         else:
             return render_template("userlogin.html", errors=errors)
@@ -60,24 +68,26 @@ def login():
         return render_template("userlogin.html")
 
 #Выход из сессии
-@app.route("/logout")
+@app.route("/logout")#
 def logout():
     session.clear()
     create_session()
     return redirect(url_for("timetable"))
 
 #Мерч магазин
-@app.route("/shop")
+@app.route("/shop")#
 def shop():
-    cart = session.get("user", {})["cart"]["product"]
+    cart = create_session()["cart"]["product"]
+    cart_values = list(cart.values())
     in_cart = []
-    for id in cart:
-        in_cart.append(get_cart_product(cart[id])[2])#######################################
+    for value in cart_values:
+        in_cart.append(Carts(id=value).item_id)
     products = Database().get_items()
+    print(products, in_cart)
     return render_template("shop.html", products=products, in_cart=in_cart, admin=create_session()["data"])
 
 #Добавить мерч
-@app.route("/add_product", methods=["GET", "POST"])
+@app.route("/add_product", methods=["GET", "POST"])#
 def add_product():
     if request.method == "POST":
         name = request.form["name"]
@@ -86,27 +96,31 @@ def add_product():
         description = request.form["description"]
         image = request.files.get("image")
 
-        filename = secure_filename(image.filename)
-        image_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        image_path = os.path.join(app.config["UPLOAD_FOLDER"], name)
         image.save(image_path)
 
         Items(name=name, price=price, image=image_path, description=description, count=count).add()
         print("save")
         return redirect(url_for("shop"))
     else:
-        return render_template("addproduct.html", admin=create_session()["data"])
+        return render_template("addproduct.html", admin=create_session()["data"], products=Database().get_items())
     
 #Информация о мерче
-@app.route("/product/<product_name>/<int:product_id>")
+@app.route("/product/<product_name>/<int:product_id>")#
 def product(product_name, product_id):
-    cart = session.get("user", {})["cart"]["product"]
-    if cart:
-        for id in cart:
-            count = product_in_cart(cart[id], product_id)#######################################
-    else:
-        count = 0
-    product_info = get_item(product_id, product_name)#######################################
-    return render_template("productinfo.html", product_info=product_info, count=count, admin=create_session()["data"])
+    cart = create_session()["cart"]["product"]
+    product_info = Items(id=product_id).info()
+    cart_values = list(cart.values())
+    count = 0
+
+    for value in cart_values:
+        product = Carts(id=value)
+        print(product_info[0], product.item_id)
+        if product_info[0]==product.item_id:
+            count = product.count
+            break
+
+    return render_template("productinfo.html", product_name=product_name, product_info=product_info, count=count, admin=create_session()["data"])
 
 #Добавить в карзину
 @app.route("/add_to_cart/<int:product_id>")
@@ -183,6 +197,7 @@ def add_concert():
     else:
         return render_template("addconcert.html", admin=create_session()["data"])
     
-
-
+@app.route("/test", methods=["GET", "POST"])
+def aaa():
+    return render_template("test.html", admin=create_session()["data"])
 app.run(debug=True)

@@ -134,7 +134,7 @@ class Database:
         return accouts
     
     def get_concerts(self, option="*"):
-        concerts = self.cur.execute(f"SELECT {option} FROM Concerts ORDER BY date").fetchall()
+        concerts = self.cur.execute(f"SELECT {option} FROM Concerts ORDER BY date, time ASC").fetchall()
         return concerts
     
     def get_items(self, option="*"):
@@ -153,11 +153,13 @@ class Database:
         ticket = self.cur.execute(f"SELECT {option} FROM Ticket").fetchall()
         return ticket
     
-
     def get_concert(self, id, option="*"):
         concert = self.cur.execute(f"SELECT {option} FROM Concerts WHERE id=?", (id,)).fetchone()
         return concert
     
+    def get_item(self, id, option="*"):
+        item = self.cur.execute(f"SELECT {option} FROM Items WHERE id=?", (id,)).fetchone()
+        return item
 
     def delete_cart(self, id):
         self.cur.execute("DELETE FROM Carts WHERE id=?", (id,))
@@ -186,6 +188,15 @@ class Users(Database):
     def get(self, option="*"):
         accout = self.cur.execute(f"SELECT {option} FROM Users WHERE email=?", (self.email,)).fetchone()
         return accout
+    
+    def carts(self):
+        cart = {}
+        co = 1
+        carts_id = self.cur.execute(f"SELECT id FROM Carts WHERE user_id=? ORDER BY id DESC", (self.id,)).fetchall()
+        for id in carts_id:
+            cart[str(co)] = id[0]
+            co += 1
+        return cart
 
 class Concerts(Database):
     def __init__(self, date, time, city, location, count):
@@ -208,20 +219,28 @@ class Concerts(Database):
         self.con.commit()
 
 class Items(Database):
-    def __init__(self, name, price, image="", description="", count=0):
+    def __init__(self, name="", price=10000, image="", description="", count=0, id=()):
         self.bd_name = "data.bd"
         self.con = sqlite3.connect(self.bd_name)
         self.cur = self.con.cursor()
-        self.image = image
-        self.name = name
-        self.price = price
-        self.description = description
-        self.count = count
+        if id:
+            self.id = id
+        else:
+            self.image = image
+            self.name = name
+            self.price = price
+            self.description = description
+            self.count = count
 
     def add(self):
         self.cur.execute("INSERT INTO Items (image, name, price, description, count) VALUES (?, ?, ?, ?, ?)", 
                 (self.image, self.name, self.price, self.description, self.count))
         self.con.commit()
+
+    def info(self):
+        item = self.cur.execute("SELECT * FROM Items WHERE id=?", (self.id,)).fetchone()
+        return item
+
 
     def delete(self):
         self.cur.execute()
@@ -256,7 +275,10 @@ class Carts(Database):
                 self.id = self.id[0]
         else:
             self.id = id
-            self.count = self.cur.execute("SELECT count FROM Carts WHERE id=?", (self.id,)).fetchone()[0]
+            data = self.cur.execute("SELECT user_id, item_id, count FROM Carts WHERE id=?", (self.id,)).fetchone()
+            self.user_id = data[0]
+            self.item_id = data[1]
+            self.count = data[2]
     
     def add(self):
         self.cur.execute("INSERT INTO Carts (user_id, item_id, count) VALUES (?, ?, ?)", (self.user_id, self.item_id, self.count))
@@ -272,7 +294,7 @@ class Carts(Database):
                     ORDER BY Carts.id DESC""", (int(self.id),))
         info = self.cur.fetchone()
         return info
-
+    
     def update(self, count):
         if count>0:
             self.cur.execute(f"UPDATE Carts SET count={count} WHERE id =?", (self.id,))

@@ -1,27 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/addproduct.css') }}">
-    <title>Добавление продукта</title>
-</head>
-<body>
-    <div class="top">
-        <h1>1-ая конструкция</h1>
-        <div>
-            {% if admin.key == 1 %}
-                <a href="/add_product">Добавить мерч</a>
-                <a href="/add_ticket">добавить концерт</a>
-            {% endif %}
-            <a href="/shop">Мерч</a>
-            <a href="/cart">Карзина</a>
-            {% if admin.id %}
-                <a href="/loguot">Выйти</a>
-            {% else %}
-                <a href="/login">Войти</a>
-            {% endif %}
-        </div>
+{% extends"base.html" %}
+
+{% block title %}Добавление продукта{% endblock %}
+
+{% block page %}
+    <div class="shop-products">
+        <table class="correct-products">
+            <thead>
+                <tr>
+                    <td>ID</td>
+                    <td>Фото</td>
+                    <td>Название</td>
+                    <td>Цена</td>
+                    <td>Описание</td>
+                    <td>Количество</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>{{ product[0] }}</td>
+                        <td>{{ product[1] }}</td>
+                        <td>{{ product[2] }}</td>
+                        <td>{{ product[3] }}</td>
+                        <td>{{ product[4] }}</td>
+                        <td>{{ product[5] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     <div class="add-product">
         <h1>Добавление товара</h1>
@@ -44,5 +51,4 @@
             <input type="submit" value="Добавить товар">
         </form>
     </div>
-</body>
-</html>
+{% endblock %}

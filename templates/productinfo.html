@@ -1,29 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/productinfo.css') }}">
-    <title>Document</title>
-</head>
-<body>
-    <div class="top">
-        <h1>1-ая конструкция</h1>
-        <div>
-            {% if admin.key == 1 %}
-                <a href="/add_product">Добавить мерч</a>
-                <a href="/add_ticket">добавить концерт</a>
-            {% endif %}
-            <a href="/shop">Мерч</a>
-            <a href="/cart">Карзина</a>
-            {% if admin.id %}
-                <a href="/loguot">Выйти</a>
-            {% else %}
-                <a href="/login">Войти</a>
-            {% endif %}
-        </div>
-    </div>
-    <div class="product">
+{% extends"base.html" %}
+
+{% block title %}{{ product_name }}{% endblock %}
+
+{% block page %}
+
+    <div class="product-info">
         <img src="/{{ product_info[1] }}" width="500">
         <p>{{ product_info[2] }}</p>
         <p>{{ product_info[3] }}</p>
@@ -33,4 +14,4 @@
         <a href="/add_to_cart/{{ product_info[0] }}"><button>Добавить в корзину</button></a>
     </div>
 </body>
-</html>
+{% endblock %}

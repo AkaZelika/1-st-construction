@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <div class="top">
+        <h1>1-ая конструкция</h1>
+        <div>
+            {% if self.title()!="1-ая конструкция" %}
+                <a href="/">Главная</a>
+            {% endif %}
+                
+            {% if admin.key == 1 %}
+                {% if self.title()!="Добавление продукта" %}
+                    <a href="/add_product">Добавить мерч</a>
+                {% endif %}
+                {% if self.title()!="Добавление концерта" %}
+                    <a href="/add_concert">Добавить концерт</a>
+                {% endif %}
+            {% endif %}
+            {% if self.title()!="Мерч" %}
+                <a href="/shop">Мерч</a>
+            {% endif %}
+            {% if self.title()!="Корзина" %}
+                <a href="/cart">Корзина</a>
+            {% endif %}
+            
+            {% if admin.id %}
+                <a href="/logout">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="page">
+        {% block page %}
+        {% endblock %}
+        {% if self.title()!="Добавление продукта" and self.title()!="Добавление концерта" %}
+    </div>
+            <footer>
+                <div class="link">
+                    Наши социальные сети:   
+                    <div>
+                        <a href="https://vk.com/firstconst" target="_blank">
+                            <img src="{{ url_for('static', filename='vk.png') }}" alt="vk" width="50px">
+                        </a>
+                    </div>
+                </div>
+            </footer>
+        {% endif %}
+    
+</body>
+</html>

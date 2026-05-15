@@ -1,0 +1,160 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.top {
+    position: absolute;
+    z-index: 999;
+    width: 100%;
+    position: fixed;
+    background-color: antiquewhite;
+}
+
+.top h1 {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    padding-top: 6vh;
+    height: 100%;
+}
+
+.footer {
+    position: fixed;
+    margin-bottom: auto;
+    margin-top: auto;
+    bottom: 0;
+}
+
+.link {
+    display: flex;
+    border-top: 1px solid black;
+    background-color: rgb(233, 238, 241);
+    font-size: 2em;
+    padding-top: 20px;
+    padding-left: 30px;
+}
+
+.link a {
+    padding-left: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+.add-concert {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+.carts-products {
+    gap: 20px;
+    margin-top: 0px;
+    padding-top: 10px;
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+.cart-product {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 250;
+    margin: 5px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+
+
+
+
+
+
+.add-product {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.add-product h1 {
+    display: flex;
+    padding-top: 5%;
+    margin: auto;
+}
+
+
+
+
+
+
+
+
+
+
+.products{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 0px;
+    padding-top: 10px;
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+.product{
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 250;
+    margin: 5px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+a{
+    color: black;
+    text-decoration: none
+}
+
+.img {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  overflow: hidden;
+}
+
+.img div {
+  position: absolute;
+  top: 1%;
+  left: 55%;
+  width: 45%;
+  height: 15px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 1);
+  padding: 5px;
+  text-align: top;
+  font-size: 20px;
+  color: red;
+}

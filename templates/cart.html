@@ -1,32 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
-    <title>Document</title>
-</head>
-<body>
-    <div class="top">
-        <h1>1-ая конструкция</h1>
-        <div>
-            {% if admin.key == 1 %}
-                <a href="/add_product">Добавить мерч</a>
-                <a href="/add_consert">добавить концерт</a>
-            {% endif %}
-            <a href="/shop">Мерч</a>
-            <a href="/cart">Корзина</a>
-            {% if admin.id %}
-                <a href="/loguot">Выйти</a>
-            {% else %}
-                <a href="/login">Войти</a>
-            {% endif %}
-        </div>
-    </div>
+{% extends"base.html" %}
+
+{% block title %}Корзина{% endblock %}
+
+{% block page %}
+
     {% set products = in_cart.product %}
-    <div class="products">
+    <div class="carts-products">
         {% for product in products %}
-            <div class="product">
+            <div class="cart-product">
                     <a href="/product/{{ products[product][1] }}/{{ products[product][0] }}">
                         <img src="{{ products[product][2] }}" width="100" height="100">
                         <div class="name">{{ products[product][1] }}</div>
@@ -52,5 +33,5 @@
             </div>  
         {% endfor %}
     </div>
-</body>
-</html>
+
+{% endblock %}
